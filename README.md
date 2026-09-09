@@ -325,31 +325,6 @@ MODELE_DIR      = "<persistent_storage_path>"   # model persistence
 
 ---
 
-## 🧠 Key Design Choices
-
-| Principle | Implementation |
-|-----------|----------------|
-| **Anti-leakage** | The TFT decoder only receives calendar + weather, never the event |
-| **NaN robustness** | Reference profile guaranteed NaN-free (global fallback); non-finite rows excluded from fit |
-| **Physical coherence** | Monotonic constraints on HDD/CDD |
-| **Reproducibility** | Fixed seeds, auto-detected GPU/CPU device |
-| **Persistence** | TFT models saved to persistent storage |
-| **Honest evaluation** | Comparison performed only on clean (non-event) days |
-
----
-
-## 🩹 Troubleshooting (fixed known errors)
-
-### `XGBoostError: Label contains NaN`
-**Cause**: switching to 15-min granularity creates rows where `energy` is NaN (filled gaps), and `profil_ref_final` could be NaN. Since the residual target is `energy − profil_ref_final`, a single NaN caused `fit` to fail.
-**Fix**: reference profile **guaranteed NaN-free** (progressive fallback + global mean) + **exclusion from fit** of any row whose label or energy is non-finite (cells 10 and 13).
-
-### `PermissionError: [Errno 13] Permission denied`
-**Cause**: on some platforms, the working directory is read-only for file writes by Lightning.
-**Fix**: `_dossier_inscriptible()` tests several local locations (`/local_disk0`, `/tmp`, temp folder) and redirects **all** Lightning outputs (checkpoints + CSV logs) to a writable disk (cell P2.1bis).
-
----
-
 ## 💼 Skills Demonstrated
 
 - **Time series**: counterfactual baseline, thermal carryover, cyclical encoding.
